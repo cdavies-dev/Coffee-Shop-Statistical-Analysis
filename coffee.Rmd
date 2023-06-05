@@ -1,0 +1,175 @@
+---
+title: "Coffee Shop Data Analysis"
+output: html_document
+date: "15 Dec 2022"
+---
+__Charlie Davies__
+
+__20462957__
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset Declaration
+
+```{r, echo = TRUE}
+coffee_early <- read.csv("Coffee_early_20462957.csv")
+coffee_income <- read.csv("Coffee_income_20462957.csv")
+coffee_tuesday <- read.csv("Coffee_Tuesday_20462957.csv")
+coffee_weekend <- read.csv("Coffee_weekend_20462957.csv")
+```
+
+## Question 1 
+
+```{r, echo = TRUE}
+summary(coffee_tuesday)
+hist(coffee_tuesday$Number.served)
+
+sum_list <- c()
+for (i in 0:nrow(coffee_tuesday)){
+  sum_list <- append(sum_list, sum(coffee_tuesday$Number.served[((1 * i) + 1):(1 * (i + 1))]))
+}
+x = barplot(sum_list)
+#axis(1, at = 0:120)
+#abline(h = mean(sum_list))
+
+plot(coffee_tuesday$Number.served)
+boxplot(coffee_tuesday$Number.served)
+mean = mean(coffee_tuesday$Number.served)
+var = var(coffee_tuesday$Number.served)
+```
+
+## Question 2A
+
+```{r, echo = TRUE}
+m = length(coffee_early$Number.served)
+n = 100
+lambda0 = mean(coffee_early$Number.served)
+lambdahat = rep(0, m)
+
+for(i in 1:m)
+{
+  x = rpois(n,lambda0)
+  lambdahat[i] = mean(x)
+}
+
+hist(lambdahat, xlab = "mle", freq = FALSE, main = "MLE")
+
+hist(lambdahat, xlab = "mle", freq = FALSE, main = "MLE")
+curve(dnorm(x, lambda0, sqrt(lambda0 / n)), from = min(lambdahat), to = max(lambdahat), col = 2, add = TRUE)
+abline(v = lambda0, col ='red', lwd = 1, lty = 1)
+
+lambda0
+```
+
+## Question 2B
+
+```{r, echo = TRUE}
+max_customer = 12
+lambda = mean(coffee_early$Number.served)
+p = ppois(max_customer, lambda, FALSE)
+num_busy = p * length(coffee_early$Number.served)
+
+p
+num_busy
+```
+
+## Question 2C
+
+```{r, echo = TRUE}
+customer_potential = 2
+average_profit = 2.10
+cost = 20
+one_hour = 12
+prob_of_more_than_current_max = p
+max_potential = customer_potential * average_profit * one_hour
+likely_profit = max_potential * prob_of_more_than_current_max
+
+max_potential
+likely_profit
+
+if (likely_profit > cost) {
+  print(Worth)
+} else if (likely_profit == cost) {
+  print('Unknown')
+} else {
+  print('Not Worth')
+}
+```
+
+## Question 3A
+```{r, echo = TRUE}
+monday = subset(coffee_early, coffee_early$Day == "Monday")["Number.served"]
+tuesday = subset(coffee_early, coffee_early$Day == "Tuesday")["Number.served"]
+wednesday = subset(coffee_early, coffee_early$Day == "Wednesday")["Number.served"]
+thursday = subset(coffee_early, coffee_early$Day == "Thursday")["Number.served"]
+friday = subset(coffee_early, coffee_early$Day == "Friday")["Number.served"]
+
+plots = data.frame(monday, tuesday, wednesday, thursday, friday)
+boxplot(plots)
+```
+
+## Question 3B
+
+```{r, echo = TRUE}
+summary(monday)
+summary(tuesday)
+summary(wednesday)
+summary(thursday)
+summary(friday)
+
+hist(monday$Number.served, main = 'Monday')
+hist(tuesday$Number.served, main = 'Tuesday')
+hist(wednesday$Number.served, main = 'Wednesday')
+hist(thursday$Number.served, main = 'Thursday')
+hist(friday$Number.served, main = 'Friday')
+```
+
+## Question 4A
+
+```{r, echo = TRUE}
+saturday = coffee_weekend$Saturday
+sunday = coffee_weekend$Sunday
+
+saturday_mean = mean(saturday)
+sunday_mean = mean(sunday)
+
+saturday_mean
+sunday_mean
+
+t.test(saturday, mu = 250)
+t.test(sunday, mu = 230)
+
+#yes/no
+```
+
+## Question 4B
+
+```{r, echo = TRUE}
+t.test(saturday, sunday, mu = 20, alternative = c('less'), paired = TRUE)
+```
+
+## Question 5A
+
+```{r, echo = TRUE}
+model <- lm(Income~., data = coffee_income)
+best_model = step(model)
+```
+
+## Question 5B
+
+```{r, echo = TRUE}
+library(car)
+
+plot(best_model)
+dwt(best_model)
+#leveneTest(coffee_early) ??
+```
+
+## Question 5C
+
+```{r, echo = TRUE}
+model <- lm(Income~., data = coffee_income)
+predict(model, newdata = data.frame(Weekday = 'Thursday', NoStaff = 5.7, Term = 1, MealOpt = 4, Temp = 19.2))
+```
